@@ -1,18 +1,11 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
-```{r global_options, echo=FALSE, warning=FALSE, message=FALSE, error=TRUE}
-require(knitr)
-opts_chunk$set(warning=FALSE, message=FALSE, error=TRUE)
-```
+
 
 The following R packages are required for the analysis:
 
-```{r libraries, results="hide"}
+
+```r
 require(data.table) # fread
 require(lubridate) # date and time operations
 require(dplyr) # filtering, mutating, grouping, and summarizing
@@ -23,32 +16,28 @@ require(scales) # Axis labels formatters
 ## Data Loading and Preprocessing
 
 ### Loading
-```{r variables, echo=FALSE, results="hide"}
-filename <- 'activity.csv'
-```
 
-The data is read from the file '`r filename`', which is assumed to be in the current working directory. The data is read with the `fread` function from the `data.table` package.
 
-```{r loading, results="hide"}
+The data is read from the file 'activity.csv', which is assumed to be in the current working directory. The data is read with the `fread` function from the `data.table` package.
+
+
+```r
 if (!file.exists(filename)) {
     stop(paste("The file '", filename, "' cannot be found!"))        
 }
 data <- fread(filename)
 ```
 
-```{r dimensions, echo=FALSE, results="hide"}
-data_dims = dim(data)
-observations_count <- format(data_dims[1], big.mark=",")
-variables_count <- data_dims[2]
-```
 
-The loaded data contains `r observations_count` observations and `r variables_count` variables.
+
+The loaded data contains 17,568 observations and 3 variables.
 
 ### Pre-processing
 
 The `date` variable is converted to the POSIXct date data type using the `ymd` function in the `lubridate` package.
 
-```{r preprocessing, results="hide"}
+
+```r
 data <- transform(data, date = ymd(date))
 ```
 
@@ -63,7 +52,8 @@ The mean and median of the total number of steps taken per day are calculated as
 1. The grouped data is summarized with the `sum` function into the `steps_total` column;
 1. The `mean` and `median` functions are executed on the `steps_total` column to compute the mean and median respectively. 
 
-```{r mean_of_total_steps_per_day}
+
+```r
 data_grouped_by_date <- 
     data %>%
     filter(!is.na(steps)) %>%
@@ -75,17 +65,16 @@ steps_median <- median(data_grouped_by_date$steps_total)
 steps_median_formatted <- format(round(steps_median), big.mark=",") 
 ```
 
-The rounded calculated mean and median of the total number of steps per day are **`r steps_mean_formatted`** and **`r steps_median_formatted`** respectively.
+The rounded calculated mean and median of the total number of steps per day are **10,766** and **10,765** respectively.
 
-```{r echo=FALSE, results="hide"}
-fig_num <- 1
-```
 
-### Figure `r fig_num`: Histogram of Total of Steps per Day
 
-Figure `r fig_num` plots the histogram of the total number of steps per day with the `ggplot2` function `geom_histogram`.
+### Figure 1: Histogram of Total of Steps per Day
 
-```{r hist_of_total_steps_per_day, fig.width=8}
+Figure 1 plots the histogram of the total number of steps per day with the `ggplot2` function `geom_histogram`.
+
+
+```r
 plotStepsHistogram <- function(title, bin_width) {
     # Plot's annotations
     annotations <- data.frame(
@@ -117,6 +106,8 @@ plotStepsHistogram <- function(title, bin_width) {
 plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram of the total number of steps per day'), bin_width = 5000)
 ```
 
+![](PA1_template_files/figure-html/hist_of_total_steps_per_day-1.png) 
+
 ## Average Daily Activity Pattern
 
 ### Data Processing
@@ -128,7 +119,8 @@ plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram of the total numb
 1. The maximum average number of steps per interval is obtained by sorting the summarized data by the `steps_avg` column, descending, and retrieving the top row with the `head` function.
 1. The time series is plotted with the `ggplot2` `geom_line` function.
 
-```{r mean_steps_per_interval}
+
+```r
 # Helper function: Converts the raw 'interval' to the total number of minutes in the day.
 as.minutes <- function(interval) {
      interval_char <- sprintf("%04d", interval)
@@ -159,17 +151,16 @@ steps_avg_max_formatted <- format(round(steps_avg_max$steps_avg), big.mark=",")
 steps_avg_max_interval_to <- steps_avg_max$interval_minutes_formatted
 ```
 
-The maximum average number of steps per interval is **`r steps_avg_max_formatted`** steps, which occurs at the **`r steps_avg_max_interval_to`** interval.
+The maximum average number of steps per interval is **206** steps, which occurs at the **08:35** interval.
 
-```{r echo=FALSE, results="hide"}
-fig_num <- fig_num + 1
-```
 
-### Figure `r fig_num`: Average Number of Steps In A Day
 
-Figure `r fig_num` plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).
+### Figure 2: Average Number of Steps In A Day
 
-```{r plot_mean_steps_per_interval, message=TRUE, fig.width=8}
+Figure 2 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).
+
+
+```r
 # Helper function: Formats a total number of minutes in the day as 'hh:mm'
 formatIntervalAsHoursAndMinutes <- function(total_minutes) {
     hour <- floor(total_minutes / 60)
@@ -208,17 +199,20 @@ plot <-
 print(plot)
 ```
 
+![](PA1_template_files/figure-html/plot_mean_steps_per_interval-1.png) 
+
 ## Imputing Missing Values
 
 ### Count of Rows Missing Data
 
-```{r steps_na_count}
+
+```r
 # Count the number of rows with missing number of steps
 steps_na_count <- sum(is.na(data$steps))
 steps_na_count_formatted <- format(steps_na_count, big.mark=",")
 ```
 
-**`r steps_na_count_formatted`** rows have a missing number of steps `steps` variable value.
+**2,304** rows have a missing number of steps `steps` variable value.
 
 ### Data Processing: Missing Data Backfill Strategy
 
@@ -230,7 +224,8 @@ The chosen strategy to input, or backfill, missing data is the following: For an
 1. Group the resulting table by `date`;
 1. Summarize by summing the `steps_filled` columns.
 
-```{r missing_steps_backfill}
+
+```r
 # Calculate the 5-minute interval means 
 data_grouped_by_interval <- 
     # Group the data (with NA removed) by interval
@@ -261,17 +256,18 @@ steps_median <- median(data_grouped_by_date$steps_total)
 steps_median_formatted <- format(round(steps_median), big.mark=",") 
 ```
 
-With the missing data backfilled, the rounded calculated mean and median of the total number of steps per day are **`r steps_mean_formatted`** and **`r steps_median_formatted`** respectively. By the mathematical nature of the backfilling strategy, the new mean is expected to be unchanged. However, with the addition of data points, the median is expected to move a little.
+With the missing data backfilled, the rounded calculated mean and median of the total number of steps per day are **10,766** and **10,762** respectively. By the mathematical nature of the backfilling strategy, the new mean is expected to be unchanged. However, with the addition of data points, the median is expected to move a little.
 
-```{r echo=FALSE, results="hide"}
-fig_num <- fig_num + 1
-```
 
-### Figure `r fig_num`: Histogram of Total of Steps per Day (With Missing Data Backfilled)
 
-```{r hist_of_total_steps_per_day_na_backfilled, fig.width=8}    
+### Figure 3: Histogram of Total of Steps per Day (With Missing Data Backfilled)
+
+
+```r
 plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram of the total number of steps per day with Missing Data Backfilled'), bin_width = 5000)
 ```
+
+![](PA1_template_files/figure-html/hist_of_total_steps_per_day_na_backfilled-1.png) 
 
 ## Weekdays vs. Weekends Activity Patterns
 

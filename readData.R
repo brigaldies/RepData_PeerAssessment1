@@ -2,12 +2,12 @@ readMeasuredData <- function(filename) {
     
     require(data.table)
     require(lubridate)
+    require(dplyr)
     
     if (!file.exists(filename)) {
         stop(paste("The file '", filename, "' cannot be found!"))        
     }
     
     message(paste("Reading", filename, '...'))
-    data <- fread(filename) 
-    transform(data, ate = ymd(data$date))    
+    fread(filename) %>% transform(date = ymd(data$date))    
 }
