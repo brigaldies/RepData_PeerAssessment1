@@ -219,7 +219,7 @@ plot <-
          y = 'Average Number Of Steps',
          title = paste('Fig.', fig_num, ': Time Series Of The Average Number Of Steps Per 5-Minute Interval')
          ) +
-    scale_x_continuous(breaks=c(0, 8*60, 16*60, 23*60+59), label = formatIntervalAsHoursAndMinutes) +    
+    scale_x_continuous(breaks=seq(from=0, to=24, by=2) * 60, label = formatIntervalAsHoursAndMinutes) +    
     geom_vline(xintercept = steps_avg_max$interval_minutes, colour="blue", linetype = "longdash") +
     geom_hline(yintercept = steps_avg_max$steps_avg, colour="blue", linetype = "longdash") +
     geom_text(data = annotations, aes(x = x, y = y, label = label), col = "blue", hjust = 0, size = 4)   
@@ -236,14 +236,14 @@ steps_na_count <- sum(is.na(data$steps))
 steps_na_count_formatted <- format(steps_na_count, big.mark=",")
 ```
 
-**`r steps_na_count_formatted`** rows have a missing number of steps `steps` variable value.
+**`r steps_na_count_formatted`** rows have a missing `steps` variable value.
 
 ### Data Processing: Missing Data Backfill Strategy
 
 The chosen strategy to input, or backfill, missing data is the following: For any given observation (row) with a missing number of steps, the missing value is set to the mean number of steps for the row's interval across all days in the data set. The corresponding processing steps go as follows:
 
-1. Create a table of the steps means for all intervals;
-1. perform a "left join" with `dplyr` between the original data and the steps means table calculated above. Note that the join associates each row with its corresponding interval's steps mean regardless of whether the number of steps is missing or not;
+1. Create a table of the means of the total-steps-per-interval for all intervals across all days;
+1. perform a "left join" with `dplyr` between the original data and the interval-steps means table calculated above. Note that the join associates each row with its corresponding interval's steps mean regardless of whether the number of steps is missing or not;
 1. Create a new colum in the resulting table called `steps_filled` to be the value of `steps` if it is avaible (i.e., not missing), or the interval's steps mean otherwise (i.e., missing);
 1. Group the resulting table by `date`;
 1. Summarize by summing the `steps_filled` columns.
@@ -279,7 +279,7 @@ steps_median <- median(data_grouped_by_date$steps_total)
 steps_median_formatted <- format(round(steps_median), big.mark=",") 
 ```
 
-With the missing data backfilled, the rounded calculated mean and median of the total number of steps per day are **`r steps_mean_formatted`** and **`r steps_median_formatted`** respectively. By the mathematical nature of the backfilling strategy and the missing data itself (Whole days are missing the steps), the new mean is unchanged. However, with the addition of data points, the median changed a bit.
+With the missing data backfilled, the rounded calculated mean and median of the total number of steps per day are **`r steps_mean_formatted`** and **`r steps_median_formatted`** respectively. By the mathematical nature of the backfilling strategy and the missing data itself (Whole days are missing the steps in all intervals), the new mean is unchanged. However, with the addition of data points, the median changed a bit.
 
 ```{r echo=FALSE, results="hide"}
 fig_num <- fig_num + 1
@@ -299,8 +299,8 @@ This section compares the steps activity patterns between week days and weekend 
 
 For this comparison, the data is prepared as follows:
 
-1. A new column `day_type` is added to the filled data table (See previous section) to represent the day type as a factor. The factor values are 'weekday' and 'weekend'.
-1. As done earlier in the first time series plot, the `interval_minutes` and `interval_minutes_formatted` columns are added to the data table in order to scale the x-axis in cumulative minutes over one day, and label the x-axis ticks as 'hh:mm';
+1. A new column `day_type` is added to the filled data table (See previous section) to represent the day type as a factor. The factor values are 'Weekday' and 'Weekend'.
+1. As done earlier in the report for Fig. 2, the `interval_minutes` and `interval_minutes_formatted` columns are added to the data table in order to scale the x-axis in cumulative minutes over one day, and label the x-axis ticks as 'hh:mm';
 1. The resulting data table is grouped by the factor `day_type` as well as `interval_minutes` and `interval_minutes_formatted`.
 1. The resulting grouped data is summarized by mean of the `steps_filled` variable.
 
@@ -343,7 +343,7 @@ plot <-
          y = 'Average Number Of Steps',
          title = paste('Fig.', fig_num, ': Time Series Of The Average Number Of Steps Per 5-Minute Interval')
          ) +
-    scale_x_continuous(breaks=c(0, 2*60, 4*60, 6*60, 8*60, 10*60, 12*60, 14*60, 16*60, 18*60, 20*60, 22*60, 23*60+59), label = formatIntervalAsHoursAndMinutes) +        
+    scale_x_continuous(breaks=seq(from=0, to=24, by=2) * 60, label = formatIntervalAsHoursAndMinutes) +    
     facet_wrap( ~ day_type, ncol=1)
     
 print(plot)
