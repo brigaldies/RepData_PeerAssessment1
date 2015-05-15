@@ -2,7 +2,24 @@
 
 
 
-The following R packages are required for the analysis:
+## Content
+
+This report provides an analysis of the foot steps (walking, running, etc.) taken by an anonymous individual over a period of two months (October and November 2012.) The "personal activity" steps data was collected from a monitoring device such as a smart phone at 5-minute intervals throughout the day.
+
+The analysis produces the following:
+
+1. A histogram of the total number of steps per day;
+1. The mean and median of the total number of steps per day;
+1. A time series plot of the mean number of steps per 5-minute interval over the course of a day;
+1. A strategy to backfill missing data;
+1. The previous time series re-visited with the missing data back filled;
+1. A comparison of the steps activity in week days vs. weekend days.
+
+## Data Loading and Preprocessing
+
+### Tools and R Packages
+
+The analyis uses R to perform all data processing and plotting. The following R packages are required for the analysis:
 
 
 ```r
@@ -13,15 +30,18 @@ require(ggplot2) # Plotting
 require(scales) # Axis labels formatters
 ```
 
-## Data Loading and Preprocessing
-
 ### Loading
 
+
+```r
+filename <- 'activity.csv'
+```
 
 The data is read from the file 'activity.csv', which is assumed to be in the current working directory. The data is read with the `fread` function from the `data.table` package.
 
 
 ```r
+filename <- 'activity.csv'
 if (!file.exists(filename)) {
     stop(paste("The file '", filename, "' cannot be found!"))        
 }
@@ -60,21 +80,22 @@ data_grouped_by_date <-
     group_by(date) %>% 
     summarize(steps_total = sum(steps))    
 steps_mean <- mean(data_grouped_by_date$steps_total)
-steps_mean_formatted <- format(round(steps_mean), big.mark=",") 
+steps_mean_formatted <- format(round(steps_mean), big.mark=",") # Rounded and formatted with a comma
 steps_median <- median(data_grouped_by_date$steps_total)
-steps_median_formatted <- format(round(steps_median), big.mark=",") 
+steps_median_formatted <- format(round(steps_median), big.mark=",") # Rounded and formatted with a comma
 ```
 
-The rounded calculated mean and median of the total number of steps per day are **10,766** and **10,765** respectively.
+The rounded mean and median of the total number of steps per day are **10,766** and **10,765** respectively.
 
 
 
-### Figure 1: Histogram of Total of Steps per Day
+### Histogram of Total of Steps per Day
 
 Figure 1 plots the histogram of the total number of steps per day with the `ggplot2` function `geom_histogram`.
 
 
 ```r
+# A function is created so that the histogram can be plotted again with missing values backfilled (Later in the repor)
 plotStepsHistogram <- function(title, bin_width) {
     # Plot's annotations
     annotations <- data.frame(
@@ -93,7 +114,7 @@ plotStepsHistogram <- function(title, bin_width) {
             axis.title.x = element_text(size=10, face="bold", vjust=-0.5), # Move the x axis label down a bit
             axis.title.y = element_text(size=10, face="bold", vjust=1) # Move the y axis label left a bit
             ) +
-        labs(x = paste0('Total Number of Steps per Day (Bin width=', bin_width, ')'), 
+        labs(x = paste0('Total Number Of Steps Per Day (Bin Width=', format(bin_width, big.mark=","), ')'), 
              y = 'Bin Frequency',
              title = title
              ) +
@@ -103,7 +124,7 @@ plotStepsHistogram <- function(title, bin_width) {
     print(plot)
 }
 
-plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram of the total number of steps per day'), bin_width = 5000)
+plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram Of The Total Number Of Steps Per Day'), bin_width = 5000)
 ```
 
 ![](PA1_template_files/figure-html/hist_of_total_steps_per_day-1.png) 
@@ -155,9 +176,9 @@ The maximum average number of steps per interval is **206** steps, which occurs 
 
 
 
-### Figure 2: Average Number of Steps In A Day
+### Average Number of Steps In A Day
 
-Figure 2 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).
+Figure 2 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis). The plot shows a very distinct uptick of steps in the morning around 8:30am, which could be interpreted (not proven here by any mean) as being the combination of the times to get ready in the morning, running on the threadmill at the gym before going to work, going to work, and/or the walking around and morning chatter at the office.
 
 
 ```r
@@ -184,13 +205,13 @@ plot <-
     ggplot(data_grouped_by_interval, aes(interval_minutes, steps_avg)) +
     geom_line() +
     theme(
-            plot.title = element_text(size=12, face="bold", vjust=2),
+            plot.title = element_text(size=11, face="bold", vjust=2),
             axis.title.x = element_text(size=10, face="bold", vjust=-0.5),
             axis.title.y = element_text(size=10, face="bold", vjust=1)
         ) +
-    labs(x = 'Time of Day (24 Hour Format)', 
-         y = 'Average Number of Steps',
-         title = paste('Fig.', fig_num, ': Time series of the average number of steps per 5-minute interval')
+    labs(x = 'Time Of Day (24-Hour Format)', 
+         y = 'Average Number Of Steps',
+         title = paste('Fig.', fig_num, ': Time Series Of The Average Number Of Steps Per 5-Minute Interval')
          ) +
     scale_x_continuous(breaks=c(0, 8*60, 16*60, 23*60+59), label = formatIntervalAsHoursAndMinutes) +    
     geom_vline(xintercept = steps_avg_max$interval_minutes, colour="blue", linetype = "longdash") +
@@ -256,19 +277,81 @@ steps_median <- median(data_grouped_by_date$steps_total)
 steps_median_formatted <- format(round(steps_median), big.mark=",") 
 ```
 
-With the missing data backfilled, the rounded calculated mean and median of the total number of steps per day are **10,766** and **10,762** respectively. By the mathematical nature of the backfilling strategy, the new mean is expected to be unchanged. However, with the addition of data points, the median is expected to move a little.
+With the missing data backfilled, the rounded calculated mean and median of the total number of steps per day are **10,766** and **10,762** respectively. By the mathematical nature of the backfilling strategy and the missing data itself (Whole days are missing the steps), the new mean is unchanged. However, with the addition of data points, the median changed a bit.
 
 
 
-### Figure 3: Histogram of Total of Steps per Day (With Missing Data Backfilled)
+### Histogram of Total of Steps per Day (With Missing Data Backfilled)
 
 
 ```r
-plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram of the total number of steps per day with Missing Data Backfilled'), bin_width = 5000)
+plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram Of The Total Number Of Steps Per Day With Missing Data Backfilled'), bin_width = 5000)
 ```
 
 ![](PA1_template_files/figure-html/hist_of_total_steps_per_day_na_backfilled-1.png) 
 
 ## Weekdays vs. Weekends Activity Patterns
 
+This section compares the steps activity patterns between week days and weekend days.
 
+### Data Processing
+
+For this comparison, the data is prepared as follows:
+
+1. A new column `day_type` is added to the filled data table (See previous section) to represent the day type as a factor. The factor values are 'weekday' and 'weekend'.
+1. As done earlier in the first time series plot, the `interval_minutes` and `interval_minutes_formatted` columns are added to the data table in order to scale the x-axis in cumulative minutes over one day, and label the x-axis ticks as 'hh:mm';
+1. The resulting data table is grouped by the factor `day_type` as well as `interval_minutes` and `interval_minutes_formatted`.
+1. The resulting grouped data is summarized by mean of the `steps_filled` variable.
+
+
+```r
+# Create the "day type" factor
+data_filled = mutate(data_filled, day_type=as.factor(ifelse(weekdays(date) %in% c('Saturday', 'Sunday'), 'Weekend', 'Weekday')))
+    
+# Group the data by day day_type and interval
+data_grouped_by_day_type <-         
+    data_filled %>%
+    # Create a interval_minutes column to represent the interval's number of minutes in the day
+    mutate(interval_minutes = as.minutes(interval)) %>%
+    # create a interval_minutes_formatted to be used for the x-axis ticks.    
+    mutate(interval_minutes_formatted = formatInterval(interval)) %>%
+    # Group by interval
+    group_by(day_type, interval_minutes, interval_minutes_formatted) %>%     
+    # Summarize by 'mean'
+    summarize(steps_avg = mean(steps_filled))
+```
+
+### Weekdays vs. Weekend Activity Plot
+
+
+
+Figure 4 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis), on two vertical panels to compare between week days and weekend days.
+
+
+```r
+# Plot
+plot <- 
+    ggplot(data_grouped_by_day_type, aes(interval_minutes, steps_avg)) +
+    geom_line() +
+    theme(
+            plot.title = element_text(size=11, face="bold", vjust=2),
+            axis.title.x = element_text(size=10, face="bold", vjust=-0.5),
+            axis.title.y = element_text(size=10, face="bold", vjust=1)
+        ) +
+    labs(x = 'Time Of Day (24-Hour Format)', 
+         y = 'Average Number Of Steps',
+         title = paste('Fig.', fig_num, ': Time Series Of The Average Number Of Steps Per 5-Minute Interval')
+         ) +
+    scale_x_continuous(breaks=c(0, 2*60, 4*60, 6*60, 8*60, 10*60, 12*60, 14*60, 16*60, 18*60, 20*60, 22*60, 23*60+59), label = formatIntervalAsHoursAndMinutes) +        
+    facet_wrap( ~ day_type, ncol=1)
+    
+print(plot)
+```
+
+![](PA1_template_files/figure-html/weekdays_vs_weekends_activity_plot-1.png) 
+
+Based on the plot, the following observations could be proposed for further behavioral analysis:
+
+1. The 8:30am uptick of activity is not as pronounced during the weekend, as the weekend mornings are presumably not as busy;
+2. Overall, there seems to be more activity throughout the day during weekends, as people are presumably more active during the weekend than during their mostly sitting office hours;
+3. There is more activity after 8pm during the weekend, as people presumably stay up later.
