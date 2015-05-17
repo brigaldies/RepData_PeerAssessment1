@@ -11,8 +11,8 @@ The analysis produces the following:
 1. A histogram of the total number of steps per day;
 1. The mean and median of the total number of steps per day;
 1. A time series plot of the mean number of steps per 5-minute interval over the course of a day;
-1. A strategy to backfill missing data;
-1. The previous time series re-visited with the missing data back filled;
+1. A strategy to impute missing data;
+1. The previous time series re-visited with the missing data imputed;
 1. A comparison of the steps activity patterns in weekdays vs. weekend days.
 
 ## Data Loading and Preprocessing
@@ -98,7 +98,7 @@ Figure 1 plots the histogram of the total number of steps per day with the `ggpl
 
 
 ```r
-# An R function is created so that the histogram can be plotted again with missing values backfilled (Later in the report)
+# An R function is created so that the histogram can be plotted again with missing values imputed (Later in the report)
 # Arguments:
 # title: Title of the plot.
 # bin_width: Histogram's bin width.
@@ -246,9 +246,9 @@ steps_na_count_formatted <- format(steps_na_count, big.mark=",")
 
 **2,304** rows have a missing `steps` variable value.
 
-### Data Processing: Missing Data Backfill Strategy
+### Data Processing: Missing Data Imputing Strategy
 
-The chosen strategy to input, or *backfill*, missing data is the following: For any given observation (row) with a missing number of steps, the missing value is set to the mean (average) number of steps for the row's interval across all days in the data set. The corresponding processing steps go as follows:
+The chosen strategy to input, or *impute*, missing data is the following: For any given observation (row) with a missing number of steps, the missing value is set to the mean (average) number of steps for the row's interval across all days in the data set. The corresponding processing steps go as follows:
 
 1. Create a table of the means of the total-steps-per-interval for all intervals across all days;
 1. perform a "left join" with `dplyr` between the original data and the interval-steps means table calculated above. Note that the join associates each row with its corresponding interval's steps mean regardless of whether the number of steps is missing or not;
@@ -271,7 +271,7 @@ data_filled <-
     data %>%
     left_join (data_grouped_by_interval, by=c('interval')) %>%
     arrange(date) %>%    
-    mutate(steps_filled=ifelse(is.na(steps), steps_avg, steps)) # Backfill: Add a new column with the NAs filled with the average
+    mutate(steps_filled=ifelse(is.na(steps), steps_avg, steps)) # Imputing: Add a new column with the NAs filled with the average
 
 # Group by date, and summarize by summing 'steps_filled'
 data_grouped_by_date <- 
@@ -286,21 +286,21 @@ steps_median <- median(data_grouped_by_date$steps_total)
 steps_median_formatted <- format(round(steps_median, 2), big.mark=",") 
 ```
 
-With the missing data backfilled, the new mean and median of the total number of steps per day are **10,766.19** and **10,766.19** respectively. By comparison with the [original](#histogram-of-total-number-of-steps-taken-per-day) mean **10,766.19** and median **10,765** with the missing data removed, the following observations are made:
+With the missing data imputed, the new mean and median of the total number of steps per day are **10,766.19** and **10,766.19** respectively. By comparison with the [original](#histogram-of-total-number-of-steps-taken-per-day) mean **10,766.19** and median **10,765** with the missing data removed, the following observations are made:
 
-1. By the mathematical nature of the backfilling strategy (mean of the interval's steps across all days) and the missing data itself (Whole days only are missing steps), the new mean is the same as that with missing data removed;
-1. Intuitively, the 8 backfilled days out of 62 days create data points around and close to the mean, and in this case, the "median point" ends up falling on the mean exactly.
+1. By the mathematical nature of the missing data imputing strategy (mean of the interval's steps across all days) and the missing data itself (Whole days only are missing steps), the new mean is the same as that with missing data removed;
+1. Intuitively, the 8 imputed days out of 62 days create data points around and close to the mean, and in this case, the "median point" ends up falling on the mean exactly.
 
 
 
-### Histogram of Total of Steps per Day (With Missing Data Backfilled)
+### Histogram of Total of Steps per Day (With Missing Data Imputed)
 
 
 ```r
-plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram Of The Total Number Of Steps Per Day With Missing Data Backfilled'), bin_width = 2500)
+plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram Of The Total Number Of Steps Per Day With Missing Data Imputed'), bin_width = 2500)
 ```
 
-![](PA1_template_files/figure-html/hist_of_total_steps_per_day_na_backfilled-1.png) 
+![](PA1_template_files/figure-html/hist_of_total_steps_per_day_na_imputed-1.png) 
 
 ## Weekdays vs. Weekends Activity Patterns
 
