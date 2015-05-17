@@ -41,7 +41,6 @@ The data is read from the file 'activity.csv', which is assumed to be in the cur
 
 
 ```r
-filename <- 'activity.csv'
 if (!file.exists(filename)) {
     stop(paste("The file '", filename, "' cannot be found!"))        
 }
@@ -190,7 +189,7 @@ The maximum average number of steps per interval is **206** steps, which occurs 
 
 ### Average Number of Steps In A Day
 
-Figure 2 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis). The plot shows a very distinct uptick of steps in the morning around 8:30am, which could be interpreted (not proven here by any mean) as being the combination of the times to get ready in the morning, running on the threadmill at the gym before going to work, going to work, and/or the walking around and morning chatter at the office.
+Figure 2 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis). The plot shows a very distinct uptick of steps in the morning around 8:30am, which could be interpreted as being the combination of the times to get ready in the morning, running on the threadmill at the gym before going to work, going to work, and/or the walking around and morning chatter at the office.
 
 
 ```r
@@ -287,7 +286,7 @@ steps_median <- median(data_grouped_by_date$steps_total)
 steps_median_formatted <- format(round(steps_median, 2), big.mark=",") 
 ```
 
-With the missing data backfilled, the new mean and median of the total number of steps per day are **10,766.19** and **10,766.19** respectively. By comparison with the original mean **10,766.19** and median **10,765** with the missing data removed, the following observations are made:
+With the missing data backfilled, the new mean and median of the total number of steps per day are **10,766.19** and **10,766.19** respectively. By comparison with the [original](#Histogram of Total Number of Steps Taken per Day) mean **10,766.19** and median **10,765** with the missing data removed, the following observations are made:
 
 1. By the mathematical nature of the backfilling strategy (mean of the interval's steps across all days) and the missing data itself (Whole days only are missing steps), the new mean is the same as that with missing data removed;
 1. Intuitively, the 8 backfilled days out of 62 days create data points around and close to the mean, and in this case, the "median point" ends up falling on the mean exactly.
@@ -371,4 +370,4 @@ Based on the plot, the following observations could be proposed for further beha
 
 ## Closing Remarks
 
-The analysis presented and summarized in this report shows an interesting social movement in the collection and analysis of "personal activity" data, which is enabled by smart phone, watch, and other wearable gadgets (See this recent Washington Post article on the matter [The Human Upgrade: The Revolution Will Be Digitized](http://www.washingtonpost.com/sf/national/2015/05/09/the-revolution-will-be-digitized/)) Are we going to be happier human beings having all this personal activity data at our disposal, or will it addict us further to the technologies that are increasingly dominating our lives?
+The analysis presented and summarized in this report shows an interesting social movement in the collection and analysis of "personal activity" data, which is enabled by smart phone, watch, and other wearable gadgets (See this recent Washington Post article on the matter [The Human Upgrade: The Revolution Will Be Digitized](http://www.washingtonpost.com/sf/national/2015/05/09/the-revolution-will-be-digitized/)) But are we going to be happier human beings having all this personal activity data at our disposal, or will it addict us further to the technologies that are increasingly dominating our lives?

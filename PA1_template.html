@@ -83,8 +83,7 @@ require(scales) # Axis labels formatters</code></pre>
 <h3>Loading</h3>
 <pre class="r"><code>filename &lt;- 'activity.csv'</code></pre>
 <p>The data is read from the file ‘activity.csv’, which is assumed to be in the current working directory. The data is read with the <code>fread</code> function from the <code>data.table</code> package.</p>
-<pre class="r"><code>filename &lt;- 'activity.csv'
-if (!file.exists(filename)) {
+<pre class="r"><code>if (!file.exists(filename)) {
     stop(paste(&quot;The file '&quot;, filename, &quot;' cannot be found!&quot;))        
 }
 data &lt;- fread(filename)</code></pre>
@@ -209,7 +208,7 @@ steps_avg_max_interval_to &lt;- steps_avg_max$interval_minutes_formatted</code><
 </div>
 <div id="average-number-of-steps-in-a-day" class="section level3">
 <h3>Average Number of Steps In A Day</h3>
-<p>Figure 2 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis). The plot shows a very distinct uptick of steps in the morning around 8:30am, which could be interpreted (not proven here by any mean) as being the combination of the times to get ready in the morning, running on the threadmill at the gym before going to work, going to work, and/or the walking around and morning chatter at the office.</p>
+<p>Figure 2 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis). The plot shows a very distinct uptick of steps in the morning around 8:30am, which could be interpreted as being the combination of the times to get ready in the morning, running on the threadmill at the gym before going to work, going to work, and/or the walking around and morning chatter at the office.</p>
 <pre class="r"><code># Helper function: Formats a total number of minutes in the day as 'hh:mm'
 formatIntervalAsHoursAndMinutes &lt;- function(total_minutes) {
     hour &lt;- floor(total_minutes / 60)
@@ -294,7 +293,7 @@ steps_mean &lt;- mean(data_grouped_by_date$steps_total)
 steps_mean_formatted &lt;- format(round(steps_mean, 2), big.mark=&quot;,&quot;) 
 steps_median &lt;- median(data_grouped_by_date$steps_total)
 steps_median_formatted &lt;- format(round(steps_median, 2), big.mark=&quot;,&quot;) </code></pre>
-<p>With the missing data backfilled, the new mean and median of the total number of steps per day are <strong>10,766.19</strong> and <strong>10,766.19</strong> respectively. By comparison with the original mean <strong>10,766.19</strong> and median <strong>10,765</strong> with the missing data removed, the following observations are made:</p>
+<p>With the missing data backfilled, the new mean and median of the total number of steps per day are <strong>10,766.19</strong> and <strong>10,766.19</strong> respectively. By comparison with the <a href="#Histogram%20of%20Total%20Number%20of%20Steps%20Taken%20per%20Day">original</a> mean <strong>10,766.19</strong> and median <strong>10,765</strong> with the missing data removed, the following observations are made:</p>
 <ol style="list-style-type: decimal">
 <li>By the mathematical nature of the backfilling strategy (mean of the interval’s steps across all days) and the missing data itself (Whole days only are missing steps), the new mean is the same as that with missing data removed;</li>
 <li>Intuitively, the 8 backfilled days out of 62 days create data points around and close to the mean, and in this case, the “median point” ends up falling on the mean exactly.</li>
@@ -364,7 +363,7 @@ print(plot)</code></pre>
 </div>
 <div id="closing-remarks" class="section level2">
 <h2>Closing Remarks</h2>
-<p>The analysis presented and summarized in this report shows an interesting social movement in the collection and analysis of “personal activity” data, which is enabled by smart phone, watch, and other wearable gadgets (See this recent Washington Post article on the matter <a href="http://www.washingtonpost.com/sf/national/2015/05/09/the-revolution-will-be-digitized/">The Human Upgrade: The Revolution Will Be Digitized</a>) Are we going to be happier human beings having all this personal activity data at our disposal, or will it addict us further to the technologies that are increasingly dominating our lives?</p>
+<p>The analysis presented and summarized in this report shows an interesting social movement in the collection and analysis of “personal activity” data, which is enabled by smart phone, watch, and other wearable gadgets (See this recent Washington Post article on the matter <a href="http://www.washingtonpost.com/sf/national/2015/05/09/the-revolution-will-be-digitized/">The Human Upgrade: The Revolution Will Be Digitized</a>) But are we going to be happier human beings having all this personal activity data at our disposal, or will it addict us further to the technologies that are increasingly dominating our lives?</p>
 </div>
 
 
