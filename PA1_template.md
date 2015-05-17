@@ -4,7 +4,7 @@
 
 ## Content
 
-This report provides an analysis of the foot steps (walking, running, etc.) taken by an anonymous individual over a period of two months (October and November 2012.) The "personal activity" steps data was collected from a monitoring device such as a smart phone at 5-minute intervals throughout the day.
+This report provides an analysis of the foot steps (walking, running, etc.) taken by an anonymous individual over a period of two months (October and November 2012.) Such so-called "personal activity" steps data was collected from a monitoring device such as a smart phone at 5-minute intervals throughout the day.
 
 The analysis produces the following:
 
@@ -13,7 +13,7 @@ The analysis produces the following:
 1. A time series plot of the mean number of steps per 5-minute interval over the course of a day;
 1. A strategy to backfill missing data;
 1. The previous time series re-visited with the missing data back filled;
-1. A comparison of the steps activity in week days vs. weekend days.
+1. A comparison of the steps activity patterns in weekdays vs. weekend days.
 
 ## Data Loading and Preprocessing
 
@@ -50,7 +50,7 @@ data <- fread(filename)
 
 
 
-The loaded data contains 17,568 observations and 3 variables.
+The loaded data contains **17,568** observations across **3** variables: **steps, date, interval**.
 
 ### Pre-processing
 
@@ -76,16 +76,20 @@ The mean and median of the total number of steps taken per day are calculated as
 ```r
 data_grouped_by_date <- 
     data %>%
-    filter(!is.na(steps)) %>%
-    group_by(date) %>% 
-    summarize(steps_total = sum(steps))    
+    filter(!is.na(steps)) %>% # Remove missing data
+    group_by(date) %>% # Group by date
+    summarize(steps_total = sum(steps)) # Sum the total number of steps per day
 steps_mean <- mean(data_grouped_by_date$steps_total)
-steps_mean_formatted <- format(round(steps_mean), big.mark=",") # Rounded and formatted with a comma
+steps_mean_formatted <- format(round(steps_mean, 2), big.mark=",") # Rounded and formatted with a comma
 steps_median <- median(data_grouped_by_date$steps_total)
-steps_median_formatted <- format(round(steps_median), big.mark=",") # Rounded and formatted with a comma
+steps_median_formatted <- format(round(steps_median, 2), big.mark=",") # Rounded and formatted with a comma
+
+# Remember the mean and median with missing data removed
+steps_mean_no_na_formatted <- steps_mean_formatted
+steps_median_no_na_formatted <- steps_median_formatted
 ```
 
-The rounded mean and median of the total number of steps per day are **10,766** and **10,765** respectively.
+The mean and median (rounded to 2 decimals) of the total number of steps per day are **10,766.19** and **10,765** respectively.
 
 
 
@@ -95,9 +99,12 @@ Figure 1 plots the histogram of the total number of steps per day with the `ggpl
 
 
 ```r
-# A function is created so that the histogram can be plotted again with missing values backfilled (Later in the repor)
+# An R function is created so that the histogram can be plotted again with missing values backfilled (Later in the report)
+# Arguments:
+# title: Title of the plot.
+# bin_width: Histogram's bin width.
 plotStepsHistogram <- function(title, bin_width) {
-    # Plot's annotations
+    # Plot's annotations to display the mean and median
     annotations <- data.frame(
         x = c(steps_mean + 200), # +200 to move the annotation to the right of the vertical line a bit
         y = c(25), 
@@ -124,31 +131,38 @@ plotStepsHistogram <- function(title, bin_width) {
     print(plot)
 }
 
-plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram Of The Total Number Of Steps Per Day'), bin_width = 5000)
+# Call the function to plot the histogram
+plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram Of The Total Number Of Steps Per Day'), bin_width = 2500)
 ```
 
 ![](PA1_template_files/figure-html/hist_of_total_steps_per_day-1.png) 
 
 ## Average Daily Activity Pattern
 
+
+
 ### Data Processing
 
+The following data processing is executed in order to analyze the average daily activity patterns:
+
 1. The observations with missing number of steps are removed from the raw data with the `!is.na(steps)` filter;
-1. The columns `interval_minutes` and `interval_minutes_formatted` are created to contain for each interval value the corresponding total number of minutes in the day as a numeric and formatted character array ('hh:mm') respectively.
-1. The filtered data is grouped by the `interval_minutes` and `interval_minutes_formatted` columns;
+1. The columns `interval_minutes` and `interval_minutes_formatted` are created to contain for each interval value `interval` the corresponding total number of minutes in the day as a numeric and formatted character array ('hh:mm') respectively; The `interval_minutes` is used for the x-axis dimension in the time series plot at the end of the processing, whereas `interval_minutes_formatted` is used to label the x-axis ticks;
+1. The filtered data is grouped by the `interval_minutes` and `interval_minutes_formatted` columns; Note: There is a one-to-one mapping between `interval`, `interval_minutes`, and `interval_minutes_formatted`, hence the grouping is equivalent to grouping by `interval`;
 1. The grouped data is summarized with the `mean` function into the `steps_avg` column;
-1. The maximum average number of steps per interval is obtained by sorting the summarized data by the `steps_avg` column, descending, and retrieving the top row with the `head` function.
-1. The time series is plotted with the `ggplot2` `geom_line` function.
+1. The maximum average number of steps per interval is obtained by sorting the summarized data by the `steps_avg` column, descending, and retrieving the top row with the `head` function;
+1. The time series is plotted with the `ggplot2` `geom_line` function (See Fig. 2).
 
 
 ```r
 # Helper function: Converts the raw 'interval' to the total number of minutes in the day.
+# Used in the dplyr mutate call below to create the interval_minutes variable.
 as.minutes <- function(interval) {
      interval_char <- sprintf("%04d", interval)
      60 * as.integer(substr(interval_char, 0, 2)) + as.integer(substr(interval_char, 3, 4))    
 }
 
 # Helper function: Formats the raw 'interval' numeric as a 'hh:mm' character vector.
+# Used in the dplyr mutate call below to create the interval_minutes_formatted variable.
 formatInterval <- function(interval) {
     interval_char <- sprintf("%04d", interval)
     sprintf('%s:%02s', substr(interval_char, 0, 2), substr(interval_char, 3, 4))
@@ -174,8 +188,6 @@ steps_avg_max_interval_to <- steps_avg_max$interval_minutes_formatted
 
 The maximum average number of steps per interval is **206** steps, which occurs at the **08:35** interval.
 
-
-
 ### Average Number of Steps In A Day
 
 Figure 2 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis). The plot shows a very distinct uptick of steps in the morning around 8:30am, which could be interpreted (not proven here by any mean) as being the combination of the times to get ready in the morning, running on the threadmill at the gym before going to work, going to work, and/or the walking around and morning chatter at the office.
@@ -189,12 +201,12 @@ formatIntervalAsHoursAndMinutes <- function(total_minutes) {
     sprintf('%d:%02d', hour, minute)    
 }
 
-# Plot's annotations
+# Plot's annotations to display the maximum average number of steps per 5-minute interval.
 annotations <- data.frame(
     x = c(steps_avg_max$interval_minutes + 10, steps_avg_max$interval_minutes + 10), 
     y = c(steps_avg_max$steps_avg + 10, 0), 
     label = c(
-        sprintf("Max Avg Steps: %s", format(round(steps_avg_max$steps_avg), big.mark=",")),
+        sprintf("Max Avg Steps Per 5-Min Interval: %s", format(round(steps_avg_max$steps_avg), big.mark=",")),
         sprintf("%d minutes (%s)", 
                 steps_avg_max$interval_minutes, 
                 steps_avg_max_interval_to)
@@ -237,7 +249,7 @@ steps_na_count_formatted <- format(steps_na_count, big.mark=",")
 
 ### Data Processing: Missing Data Backfill Strategy
 
-The chosen strategy to input, or backfill, missing data is the following: For any given observation (row) with a missing number of steps, the missing value is set to the mean number of steps for the row's interval across all days in the data set. The corresponding processing steps go as follows:
+The chosen strategy to input, or *backfill*, missing data is the following: For any given observation (row) with a missing number of steps, the missing value is set to the mean (average) number of steps for the row's interval across all days in the data set. The corresponding processing steps go as follows:
 
 1. Create a table of the means of the total-steps-per-interval for all intervals across all days;
 1. perform a "left join" with `dplyr` between the original data and the interval-steps means table calculated above. Note that the join associates each row with its corresponding interval's steps mean regardless of whether the number of steps is missing or not;
@@ -247,37 +259,38 @@ The chosen strategy to input, or backfill, missing data is the following: For an
 
 
 ```r
-# Calculate the 5-minute interval means 
-data_grouped_by_interval <- 
-    # Group the data (with NA removed) by interval
+# Create a table of the means of the total-steps-per-interval for all intervals across all days 
+data_grouped_by_interval <-     
     data %>%
-    filter(!is.na(steps)) %>%
-    group_by(interval) %>% 
-    # Summarize by 'mean'
-    summarize(steps_avg = round(mean(steps)))
+    filter(!is.na(steps)) %>% # Remove missing data
+    group_by(interval) %>%  # Group by interval
+    summarize(steps_avg = mean(steps)) # Calculate the 'mean' number of steps for each 5-minute interval across all days
 
 # Left-join data with data_grouped_by_interval in order to associate
 # each observation with its corresponding interval's mean number of steps.
 data_filled <-  
     data %>%
     left_join (data_grouped_by_interval, by=c('interval')) %>%
-    arrange(date) %>%
-    # Add a new column with the NAs filled with the average
-    mutate(steps_filled=ifelse(is.na(steps), steps_avg, steps))
+    arrange(date) %>%    
+    mutate(steps_filled=ifelse(is.na(steps), steps_avg, steps)) # Backfill: Add a new column with the NAs filled with the average
 
 # Group by date, and summarize by summing 'steps_filled'
 data_grouped_by_date <- 
     data_filled %>%
     group_by(date) %>% 
     summarize(steps_total = sum(steps_filled))
-        
+    
+# Calculate and format the new mean and median
 steps_mean <- mean(data_grouped_by_date$steps_total)
-steps_mean_formatted <- format(round(steps_mean), big.mark=",") 
+steps_mean_formatted <- format(round(steps_mean, 2), big.mark=",") 
 steps_median <- median(data_grouped_by_date$steps_total)
-steps_median_formatted <- format(round(steps_median), big.mark=",") 
+steps_median_formatted <- format(round(steps_median, 2), big.mark=",") 
 ```
 
-With the missing data backfilled, the rounded calculated mean and median of the total number of steps per day are **10,766** and **10,762** respectively. By the mathematical nature of the backfilling strategy and the missing data itself (Whole days are missing the steps in all intervals), the new mean is unchanged. However, with the addition of data points, the median changed a bit.
+With the missing data backfilled, the new mean and median of the total number of steps per day are **10,766.19** and **10,766.19** respectively. By comparison with the original mean **10,766.19** and median **10,765** with the missing data removed, the following observations are made:
+
+1. By the mathematical nature of the backfilling strategy (mean of the interval's steps across all days) and the missing data itself (Whole days only are missing steps), the new mean is the same as that with missing data removed;
+1. Intuitively, the 8 backfilled days out of 62 days create data points around and close to the mean, and in this case, the "median point" ends up falling on the mean exactly.
 
 
 
@@ -285,14 +298,14 @@ With the missing data backfilled, the rounded calculated mean and median of the 
 
 
 ```r
-plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram Of The Total Number Of Steps Per Day With Missing Data Backfilled'), bin_width = 5000)
+plotStepsHistogram(title = paste('Fig.', fig_num, ': Histogram Of The Total Number Of Steps Per Day With Missing Data Backfilled'), bin_width = 2500)
 ```
 
 ![](PA1_template_files/figure-html/hist_of_total_steps_per_day_na_backfilled-1.png) 
 
 ## Weekdays vs. Weekends Activity Patterns
 
-This section compares the steps activity patterns between week days and weekend days.
+This section compares the steps activity patterns between weekdays and weekend days.
 
 ### Data Processing
 
@@ -325,7 +338,7 @@ data_grouped_by_day_type <-
 
 
 
-Figure 4 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis), on two vertical panels to compare between week days and weekend days.
+Figure 4 plots the time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis), on two vertical panels to compare between weekdays and weekend days.
 
 
 ```r
@@ -352,6 +365,10 @@ print(plot)
 
 Based on the plot, the following observations could be proposed for further behavioral analysis:
 
-1. The 8:30am uptick of activity is not as pronounced during the weekend, as the weekend mornings are presumably not as busy;
-2. Overall, there seems to be more activity throughout the day during weekends, as people are presumably more active during the weekend than during their mostly sitting office hours;
+1. The 8:30am uptick of activity is not as pronounced during the weekend, as the weekend mornings are presumably not as busy as during the week;
+2. Overall, there seems to be more activity throughout the day during weekends, as people are presumably more active during the weekend than during their mostly sitting-at-their-desk office hours;
 3. There is more activity after 8pm during the weekend, as people presumably stay up later.
+
+## Closing Remarks
+
+The analysis presented and summarized in this report shows an interesting social movement in the collection and analysis of "personal activity" data, which is enabled by smart phone, watch, and other wearable gadgets (See this recent Washington Post article on the matter [The Human Upgrade: The Revolution Will Be Digitized](http://www.washingtonpost.com/sf/national/2015/05/09/the-revolution-will-be-digitized/)) Are we going to be happier human beings having all this personal activity data at our disposal, or will it addict us further to the technologies that are increasingly dominating our lives?
