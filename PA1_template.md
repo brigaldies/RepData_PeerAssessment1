@@ -286,7 +286,7 @@ steps_median <- median(data_grouped_by_date$steps_total)
 steps_median_formatted <- format(round(steps_median, 2), big.mark=",") 
 ```
 
-With the missing data backfilled, the new mean and median of the total number of steps per day are **10,766.19** and **10,766.19** respectively. By comparison with the [original](#Histogram of Total Number of Steps Taken per Day) mean **10,766.19** and median **10,765** with the missing data removed, the following observations are made:
+With the missing data backfilled, the new mean and median of the total number of steps per day are **10,766.19** and **10,766.19** respectively. By comparison with the [original](#histogram-of-total-number-of-steps-taken-per-day) mean **10,766.19** and median **10,765** with the missing data removed, the following observations are made:
 
 1. By the mathematical nature of the backfilling strategy (mean of the interval's steps across all days) and the missing data itself (Whole days only are missing steps), the new mean is the same as that with missing data removed;
 1. Intuitively, the 8 backfilled days out of 62 days create data points around and close to the mean, and in this case, the "median point" ends up falling on the mean exactly.

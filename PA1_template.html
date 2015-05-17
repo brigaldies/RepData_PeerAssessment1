@@ -293,7 +293,7 @@ steps_mean &lt;- mean(data_grouped_by_date$steps_total)
 steps_mean_formatted &lt;- format(round(steps_mean, 2), big.mark=&quot;,&quot;) 
 steps_median &lt;- median(data_grouped_by_date$steps_total)
 steps_median_formatted &lt;- format(round(steps_median, 2), big.mark=&quot;,&quot;) </code></pre>
-<p>With the missing data backfilled, the new mean and median of the total number of steps per day are <strong>10,766.19</strong> and <strong>10,766.19</strong> respectively. By comparison with the <a href="#Histogram%20of%20Total%20Number%20of%20Steps%20Taken%20per%20Day">original</a> mean <strong>10,766.19</strong> and median <strong>10,765</strong> with the missing data removed, the following observations are made:</p>
+<p>With the missing data backfilled, the new mean and median of the total number of steps per day are <strong>10,766.19</strong> and <strong>10,766.19</strong> respectively. By comparison with the <a href="#histogram-of-total-number-of-steps-taken-per-day">original</a> mean <strong>10,766.19</strong> and median <strong>10,765</strong> with the missing data removed, the following observations are made:</p>
 <ol style="list-style-type: decimal">
 <li>By the mathematical nature of the backfilling strategy (mean of the interval’s steps across all days) and the missing data itself (Whole days only are missing steps), the new mean is the same as that with missing data removed;</li>
 <li>Intuitively, the 8 backfilled days out of 62 days create data points around and close to the mean, and in this case, the “median point” ends up falling on the mean exactly.</li>
